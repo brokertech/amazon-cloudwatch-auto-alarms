@@ -243,6 +243,14 @@ def lambda_handler(event, context):
             )
             scan_and_process_alarm_tags(create_alarm_tag, default_alarms, metric_dimensions_map, sns_topic_arn,
                                         cw_namespace, create_default_alarms_flag, alarm_separator, alarm_identifier)
+        elif 'action' in event and event['action'] == 'delete':
+            name = ''
+            if 'name' in event:
+                name = event['name']
+            logger.debug(
+                f'Deleting alarms beginning: {alarm_identifier}{alarm_separator}{name}'
+            )
+            delete_alarms(name, alarm_identifier, alarm_separator)
 
     except Exception as e:
         # If any other exceptions which we didn't expect are raised

@@ -52,7 +52,7 @@ Resources:
           ALARM_MEMORY_HIGH_THRESHOLD: 75
           ALARM_DISK_PERCENT_LOW_THRESHOLD: 20
           ALARM_IDENTIFIER_PREFIX: !Ref AlarmIdentifierPrefix
-          ALARM_SEPARATOR: " "
+          ALARM_SEPARATOR: "-"
           CLOUDWATCH_APPEND_DIMENSIONS: 'InstanceId, ImageId, InstanceType'
 
           ALARM_LAMBDA_ERROR_THRESHOLD: 0
