@@ -590,7 +590,9 @@ def create_alarm(AlarmName, AlarmDescription, MetricName, ComparisonOperator, Pe
 
 def delete_alarms(name, alarm_identifier, alarm_separator):
     try:
-        AlarmNamePrefix = alarm_separator.join([alarm_identifier, name])
+        AlarmNamePrefix = alarm_identifier
+        if name:
+            AlarmNamePrefix += alarm_separator + name
         AlarmNamePrefix += alarm_separator
         cw_client = boto3_client('cloudwatch')
         logger.debug('calling describe alarms with prefix {}'.format(AlarmNamePrefix))

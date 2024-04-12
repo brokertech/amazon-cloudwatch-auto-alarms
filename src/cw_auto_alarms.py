@@ -238,7 +238,7 @@ def lambda_handler(event, context):
             logger.info('Delete DB Instance event occurred for RDS: {}'.format(db_id))
             delete_alarms(db_id, alarm_identifier, alarm_separator)
         elif 'action' in event and event['action'] == 'scan':
-            logger.debug(
+            logger.info(
                 f'Scanning for EC2 instances with tag: {create_alarm_tag} to create alarm'
             )
             scan_and_process_alarm_tags(create_alarm_tag, default_alarms, metric_dimensions_map, sns_topic_arn,
@@ -247,7 +247,7 @@ def lambda_handler(event, context):
             name = ''
             if 'name' in event:
                 name = event['name']
-            logger.debug(
+            logger.info(
                 f'Deleting alarms beginning: {alarm_identifier}{alarm_separator}{name}'
             )
             delete_alarms(name, alarm_identifier, alarm_separator)
