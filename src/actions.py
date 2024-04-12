@@ -440,27 +440,6 @@ def determine_wildcard_alarms(wildcard_alarm_tag, alarm_separator, instance_info
     return fixed_alarm_tags
 
 
-
-
-
-
-
-
-
-
-
-        # {
-        #     'Key': alarm_separator.join(
-        #         [alarm_identifier, cw_namespace, 'LogicalDisk % Free Space', 'objectname', 'LogicalDisk',
-        #          'instance', 'C:', 'LessThanThreshold', default_period, default_evaluation_periods,
-        #          default_statistic, 'Created_by_CloudWatchAutoAlarms']),
-        #     'Value': alarm_disk_space_percent_free_threshold
-        # },
-
-
-
-
-
 def determine_platform(imageid):
     try:
         ec2_client = boto3_client('ec2')

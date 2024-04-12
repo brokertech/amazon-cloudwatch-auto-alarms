@@ -33,7 +33,7 @@ alarm_lambda_destination_delivery_failure_threshold = getenv("ALARM_LAMBDA_DESTI
 
 sns_topic_arn = getenv("DEFAULT_ALARM_SNS_TOPIC_ARN", None)
 
-alarm_separator = '-'
+alarm_separator = getenv("ALARM_SEPARATOR", '-')
 alarm_identifier = getenv("ALARM_IDENTIFIER_PREFIX", 'AutoAlarm')
 
 default_period = '5m'
@@ -56,7 +56,7 @@ def lambda_handler(event, context):
             {
                 'Key': alarm_separator.join(
                     [alarm_identifier, 'AWS/RDS', 'CPUUtilization', 'GreaterThanThreshold', default_period,
-                     default_evaluation_periods, default_statistic, 'Created_by_CloudWatchAutoAlarms']),
+                     default_evaluation_periods, default_statistic]),
                 'Value': alarm_rds_cpu_high_default_threshold
             }
         ],
@@ -64,14 +64,14 @@ def lambda_handler(event, context):
             {
                 'Key': alarm_separator.join(
                     [alarm_identifier, 'AWS/EC2', 'CPUUtilization', 'GreaterThanThreshold', default_period,
-                     default_evaluation_periods, default_statistic, 'Created_by_CloudWatchAutoAlarms']),
+                     default_evaluation_periods, default_statistic]),
                 'Value': alarm_cpu_high_default_threshold
             },
             # This is an example alarm using anomaly detection
             # {
             #     'Key': alarm_separator.join(
             #         [alarm_identifier, 'AWS/EC2', 'CPUUtilization', 'GreaterThanUpperThreshold', default_period,
-            #          default_evaluation_periods, default_statistic, 'Created_by_CloudWatchAutoAlarms']),
+            #          default_evaluation_periods, default_statistic]),
             #     'Value': alarm_cpu_high_anomaly_detection_default_threshold
             # }
         ],
@@ -79,13 +79,13 @@ def lambda_handler(event, context):
             {
                 'Key': alarm_separator.join(
                     [alarm_identifier, 'AWS/Lambda', 'Errors', 'GreaterThanThreshold', default_period,
-                     default_evaluation_periods, default_statistic, 'Created_by_CloudWatchAutoAlarms']),
+                     default_evaluation_periods, default_statistic]),
                 'Value': alarm_lambda_error_threshold
             },
             {
                 'Key': alarm_separator.join(
                     [alarm_identifier, 'AWS/Lambda', 'Throttles', 'GreaterThanThreshold', default_period,
-                     default_evaluation_periods, default_statistic, 'Created_by_CloudWatchAutoAlarms']),
+                     default_evaluation_periods, default_statistic]),
                 'Value': alarm_lambda_throttles_threshold
             }
         ],
@@ -96,14 +96,13 @@ def lambda_handler(event, context):
                     'Key': alarm_separator.join(
                         [alarm_identifier, cw_namespace, 'LogicalDisk % Free Space', 'objectname', 'LogicalDisk',
                          'instance', 'C:', 'LessThanThreshold', default_period, default_evaluation_periods,
-                         default_statistic, 'Created_by_CloudWatchAutoAlarms']),
+                         default_statistic]),
                     'Value': alarm_disk_space_percent_free_threshold
                 },
                 {
                     'Key': alarm_separator.join(
                         [alarm_identifier, cw_namespace, 'Memory % Committed Bytes In Use', 'objectname', 'Memory',
-                         'GreaterThanThreshold', default_period, default_evaluation_periods, default_statistic,
-                         'Created_by_CloudWatchAutoAlarms']),
+                         'GreaterThanThreshold', default_period, default_evaluation_periods, default_statistic]),
                     'Value': alarm_memory_high_default_threshold
                 }
             ],
@@ -111,15 +110,13 @@ def lambda_handler(event, context):
                 {
                     'Key': alarm_separator.join(
                         [alarm_identifier, cw_namespace, 'disk_used_percent', 'device', 'nvme0n1p1', 'fstype', 'xfs', 'path',
-                         '/', 'GreaterThanThreshold', default_period, default_evaluation_periods, default_statistic,
-                         'Created_by_CloudWatchAutoAlarms']),
+                         '/', 'GreaterThanThreshold', default_period, default_evaluation_periods, default_statistic]),
                     'Value': alarm_disk_used_percent_threshold
                 },
                 {
                     'Key': alarm_separator.join(
                         [alarm_identifier, cw_namespace, 'mem_used_percent', 'GreaterThanThreshold', default_period,
-                         default_evaluation_periods, default_statistic,
-                         'Created_by_CloudWatchAutoAlarms']),
+                         default_evaluation_periods, default_statistic]),
                     'Value': alarm_memory_high_default_threshold
                 }
             ],
@@ -127,15 +124,13 @@ def lambda_handler(event, context):
                 {
                     'Key': alarm_separator.join(
                         [alarm_identifier, cw_namespace, 'disk_used_percent', 'device', 'xvda2', 'fstype', 'xfs', 'path',
-                         '/', 'GreaterThanThreshold', default_period, default_evaluation_periods, default_statistic,
-                         'Created_by_CloudWatchAutoAlarms']),
+                         '/', 'GreaterThanThreshold', default_period, default_evaluation_periods, default_statistic]),
                     'Value': alarm_disk_used_percent_threshold
                 },
                 {
                     'Key': alarm_separator.join(
                         [alarm_identifier, cw_namespace, 'mem_used_percent', 'GreaterThanThreshold', default_period,
-                         default_evaluation_periods, default_statistic,
-                         'Created_by_CloudWatchAutoAlarms']),
+                         default_evaluation_periods, default_statistic]),
                     'Value': alarm_memory_high_default_threshold
                 }
             ],
@@ -143,15 +138,13 @@ def lambda_handler(event, context):
                 {
                     'Key': alarm_separator.join(
                         [alarm_identifier, cw_namespace, 'disk_used_percent', 'device', 'xvda1', 'fstype', 'ext4', 'path',
-                         '/', 'GreaterThanThreshold', default_period, default_evaluation_periods, default_statistic,
-                         'Created_by_CloudWatchAutoAlarms']),
+                         '/', 'GreaterThanThreshold', default_period, default_evaluation_periods, default_statistic]),
                     'Value': alarm_disk_used_percent_threshold
                 },
                 {
                     'Key': alarm_separator.join(
                         [alarm_identifier, cw_namespace, 'mem_used_percent', 'GreaterThanThreshold', default_period,
-                         default_evaluation_periods, default_statistic,
-                         'Created_by_CloudWatchAutoAlarms']),
+                         default_evaluation_periods, default_statistic]),
                     'Value': alarm_memory_high_default_threshold
                 }
             ],
@@ -159,15 +152,13 @@ def lambda_handler(event, context):
                 {
                     'Key': alarm_separator.join(
                         [alarm_identifier, cw_namespace, 'disk_used_percent', 'device', 'xvda1', 'fstype', 'xfs', 'path',
-                         '/', 'GreaterThanThreshold', default_period, default_evaluation_periods, default_statistic,
-                         'Created_by_CloudWatchAutoAlarms']),
+                         '/', 'GreaterThanThreshold', default_period, default_evaluation_periods, default_statistic]),
                     'Value': alarm_disk_used_percent_threshold
                 },
                 {
                     'Key': alarm_separator.join(
                         [alarm_identifier, cw_namespace, 'mem_used_percent', 'GreaterThanThreshold', default_period,
-                         default_evaluation_periods, default_statistic,
-                         'Created_by_CloudWatchAutoAlarms']),
+                         default_evaluation_periods, default_statistic]),
                     'Value': alarm_memory_high_default_threshold
                 }
             ]
