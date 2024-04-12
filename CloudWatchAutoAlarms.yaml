@@ -34,7 +34,7 @@ Resources:
     Properties:
       FunctionName: "CloudWatchAutoAlarms"
       Handler: cw_auto_alarms.lambda_handler
-      Runtime: python3.8
+      Runtime: python3.11
       Role:  !GetAtt CloudWatchAutoAlarmLambdaRole.Arn
       MemorySize: !Ref Memory
       Timeout: 600
@@ -43,7 +43,7 @@ Resources:
         S3Key: !Ref S3DeploymentKey
       Environment:
         Variables:
-          ALARM_TAG: Create_Auto_Alarms
+          ALARM_TAG: UseAutoAlarms
           CREATE_DEFAULT_ALARMS: true
           CLOUDWATCH_NAMESPACE: CWAgent
           ALARM_CPU_HIGH_THRESHOLD: 75
