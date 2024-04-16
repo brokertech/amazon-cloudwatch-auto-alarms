@@ -141,9 +141,10 @@ def process_rds_alarms(db_arn, is_cluster, activation_tag, default_alarms, sns_t
         EvaluationPeriods = alarm_properties[5]
         Statistic = alarm_properties[6]
 
-    AlarmName = alarm_separator.join(
-        [alarm_identifier, db_id, Namespace, MetricName, ComparisonOperator, str(tag['Value']),
-         Period, "{}p".format(EvaluationPeriods), Statistic])
+    AlarmName = f"{alarm_identifier} for {db_id} - {Namespace}/{MetricName} {get_comparison_for_name(ComparisonOperator)} {str(alarm_tag['Value'])}"
+    #AlarmName = alarm_separator.join(
+    #    [alarm_identifier, db_id, Namespace, MetricName, ComparisonOperator, str(tag['Value']),
+    #     Period, "{}p".format(EvaluationPeriods), Statistic])
 
     # capture optional alarm description
     try:
@@ -196,9 +197,10 @@ def process_lambda_alarms(function_name, tags, activation_tag, default_alarms, s
 
             Statistic = alarm_properties[(5 + eval_period_offset)]
 
-            AlarmName = alarm_separator.join(
-                [alarm_identifier, function_name, Namespace, MetricName, ComparisonOperator, str(tag['Value']),
-                 Period, "{}p".format(EvaluationPeriods), Statistic])
+            AlarmName = f"{alarm_identifier} for {function_name} - {Namespace}/{MetricName} {get_comparison_for_name(ComparisonOperator)} {str(alarm_tag['Value'])}"
+            #AlarmName = alarm_separator.join(
+            #    [alarm_identifier, function_name, Namespace, MetricName, ComparisonOperator, str(tag['Value']),
+            #     Period, "{}p".format(EvaluationPeriods), Statistic])
 
             # capture optional alarm description
             try:
@@ -252,18 +254,7 @@ def create_alarm_from_tag(id, name, alarm_tag, instance_info, metric_dimensions_
 
     Statistic = alarm_properties[(properties_offset + 5 + eval_period_offset)]
 
-    match ComparisonOperator:
-        case 'GreaterThanThreshold' | 'GreaterThanUpperThreshold':
-            AlarmName += ' > '
-        case 'LessThanThreshold' | 'LessThanLowerThreshold':
-            AlarmName += ' < '
-        case 'GreaterThanOrEqualToThreshold':
-            AlarmName += ' >= '
-        case 'LessThanOrEqualToThreshold':
-            AlarmName += ' <= '
-        case 'LessThanLowerOrGreaterThanUpperThreshold':
-            AlarmName += ' <> '
-    AlarmName += str(alarm_tag['Value'])
+    AlarmName += f"{get_comparison_for_name(ComparisonOperator)} {str(alarm_tag['Value'])}"
     #AlarmName += alarm_separator.join(['', ComparisonOperator, str(alarm_tag['Value']), str(Period), "{}p".format(EvaluationPeriods), Statistic])
 
     # add the description to the alarm name. If none are specified, log a message
@@ -277,6 +268,22 @@ def create_alarm_from_tag(id, name, alarm_tag, instance_info, metric_dimensions_
     create_alarm(AlarmName, AlarmDescription, MetricName, ComparisonOperator, Period, alarm_tag['Value'], Statistic,
                  namespace,
                  dimensions, EvaluationPeriods, sns_topic_arn)
+
+
+def get_comparison_for_name(comparison_operator):
+    match comparison_operator:
+        case 'GreaterThanThreshold' | 'GreaterThanUpperThreshold':
+            return '>'
+        case 'LessThanThreshold' | 'LessThanLowerThreshold':
+            return '<'
+        case 'GreaterThanOrEqualToThreshold':
+            return '>='
+        case 'LessThanOrEqualToThreshold':
+            return '<='
+        case 'LessThanLowerOrGreaterThanUpperThreshold':
+            return '<>'
+        case _:
+            return ''
 
 
 def determine_dimensions(AlarmName, alarm_separator, alarm_tag, instance_info, metric_dimensions_map, namespace):
