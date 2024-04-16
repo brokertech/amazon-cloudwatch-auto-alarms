@@ -252,7 +252,7 @@ def create_alarm_from_tag(id, name, alarm_tag, instance_info, metric_dimensions_
 
     Statistic = alarm_properties[(properties_offset + 5 + eval_period_offset)]
 
-    AlarmName += f"{get_comparison_for_name(ComparisonOperator)} {str(alarm_tag['Value'])}"
+    AlarmName += f" {get_comparison_for_name(ComparisonOperator)} {str(alarm_tag['Value'])}"
     #AlarmName += alarm_separator.join(['', ComparisonOperator, str(alarm_tag['Value']), str(Period), "{}p".format(EvaluationPeriods), Statistic])
 
     # add the description to the alarm name. If none are specified, log a message
