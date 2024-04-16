@@ -146,15 +146,8 @@ def process_rds_alarms(db_arn, is_cluster, activation_tag, default_alarms, sns_t
     #    [alarm_identifier, db_id, Namespace, MetricName, ComparisonOperator, str(tag['Value']),
     #     Period, "{}p".format(EvaluationPeriods), Statistic])
 
-    # capture optional alarm description
-    try:
-        AlarmDescription = alarm_properties[7]
-    except:
-        logger.info('Description not supplied')
-        AlarmDescription = "Create by AutoAlarms"
-
-    create_alarm(AlarmName, AlarmDescription, MetricName, ComparisonOperator, Period, tag['Value'], Statistic,
-                 Namespace, dimensions, EvaluationPeriods, sns_topic_arn)
+    create_alarm(AlarmName, MetricName, ComparisonOperator, Period, tag['Value'], Statistic,
+                 Namespace, dimensions, EvaluationPeriods, sns_topic_arn, True)
 
 
 def process_lambda_alarms(function_name, tags, activation_tag, default_alarms, sns_topic_arn, alarm_separator,
@@ -201,16 +194,9 @@ def process_lambda_alarms(function_name, tags, activation_tag, default_alarms, s
             #    [alarm_identifier, function_name, Namespace, MetricName, ComparisonOperator, str(tag['Value']),
             #     Period, "{}p".format(EvaluationPeriods), Statistic])
 
-            # capture optional alarm description
-            try:
-                AlarmDescription = alarm_properties[(6 + eval_period_offset)]
-            except:
-                logger.info('Description not supplied')
-                AlarmDescription = "Create by AutoAlarms"
-
-            create_alarm(AlarmName, AlarmDescription, MetricName, ComparisonOperator, Period, tag['Value'], Statistic,
+            create_alarm(AlarmName, MetricName, ComparisonOperator, Period, tag['Value'], Statistic,
                          Namespace,
-                         dimensions, EvaluationPeriods, sns_topic_arn)
+                         dimensions, EvaluationPeriods, sns_topic_arn, True)
 
 
 # def create_alarm_from_wildcard_tag(instance_id, alarm_tag, instance_info, metric_dimensions_map, sns_topic_arn,
@@ -255,16 +241,9 @@ def create_alarm_from_tag(id, name, alarm_tag, instance_info, metric_dimensions_
     AlarmName += f" {get_comparison_for_name(ComparisonOperator)} {str(alarm_tag['Value'])}"
     #AlarmName += alarm_separator.join(['', ComparisonOperator, str(alarm_tag['Value']), str(Period), "{}p".format(EvaluationPeriods), Statistic])
 
-    # add the description to the alarm name. If none are specified, log a message
-    try:
-        AlarmDescription = alarm_properties[(properties_offset + 6 + eval_period_offset)]
-    except:
-        logger.info('Description not supplied')
-        AlarmDescription = "Create by AutoAlarms"
-
-    create_alarm(AlarmName, AlarmDescription, MetricName, ComparisonOperator, Period, alarm_tag['Value'], Statistic,
+    create_alarm(AlarmName, MetricName, ComparisonOperator, Period, alarm_tag['Value'], Statistic,
                  namespace,
-                 dimensions, EvaluationPeriods, sns_topic_arn)
+                 dimensions, EvaluationPeriods, sns_topic_arn, True)
 
 
 def get_comparison_for_name(comparison_operator):
@@ -536,15 +515,11 @@ def convert_to_seconds(s):
 
 # Alarm Name Format: <AlarmIdentifier>-<InstanceId>-<Namespace>-<MetricName>-<ComparisonOperator>-<Threshold>-<Period>-<EvaluationPeriods>p-<Statistic>
 # Example:  AutoAlarm-i-00e4f327736cb077f-AWS/EC2_CPUUtilization-GreaterThanThreshold-80-5m-1p=Average
-def create_alarm(AlarmName, AlarmDescription, MetricName, ComparisonOperator, Period, Threshold, Statistic, Namespace,
+def create_alarm(AlarmName, MetricName, ComparisonOperator, Period, Threshold, Statistic, Namespace,
                  Dimensions,
                  EvaluationPeriods,
-                 sns_topic_arn):
-    if AlarmDescription:
-        AlarmDescription = AlarmDescription.replace("_", " ")
-    else:
-        AlarmDescription = 'Created by cloudwatch-auto-alarms'
-
+                 sns_topic_arn,
+                 notify_ok):
     try:
         Period = convert_to_seconds(Period)
     except Exception as e:
@@ -572,7 +547,7 @@ def create_alarm(AlarmName, AlarmDescription, MetricName, ComparisonOperator, Pe
 
         alarm = {
             'AlarmName': AlarmName,
-            'AlarmDescription': AlarmDescription,
+            'AlarmDescription': 'Created by cloudwatch-auto-alarms',
             'EvaluationPeriods': int(EvaluationPeriods),
             'ComparisonOperator': ComparisonOperator,
             'Metrics': metrics
@@ -592,6 +567,8 @@ def create_alarm(AlarmName, AlarmDescription, MetricName, ComparisonOperator, Pe
 
         if sns_topic_arn is not None:
             alarm['AlarmActions'] = [sns_topic_arn]
+            if notify_ok:
+                alarm['OKActions'] = [sns_topic_arn]
 
         cw_client.put_metric_alarm(**alarm)
 
