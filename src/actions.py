@@ -230,7 +230,8 @@ def create_alarm_from_tag(id, name, alarm_tag, instance_info, metric_dimensions_
     namespace = alarm_properties[1]
     MetricName = alarm_properties[2]
 
-    AlarmName = alarm_separator.join([alarm_identifier, id, name, namespace, MetricName])
+    AlarmName = f"{alarm_identifier} for {id}[{name}] - {namespace}/{MetricName}"
+    #AlarmName = alarm_separator.join([alarm_identifier, id, name, namespace, MetricName])
 
     dimensions, properties_offset, AlarmName = determine_dimensions(AlarmName, alarm_separator, alarm_tag,
                                                                     instance_info, metric_dimensions_map,
@@ -251,8 +252,18 @@ def create_alarm_from_tag(id, name, alarm_tag, instance_info, metric_dimensions_
 
     Statistic = alarm_properties[(properties_offset + 5 + eval_period_offset)]
 
-    AlarmName += alarm_separator.join(
-        ['', ComparisonOperator, str(alarm_tag['Value']), str(Period), "{}p".format(EvaluationPeriods), Statistic])
+    if ComparisonOperator in ['GreaterThanThreshold', 'GreaterThanUpperThreshold']:
+        AlarmName += ' > '
+    if ComparisonOperator in ['LessThanThreshold', 'LessThanLowerThreshold']:
+        AlarmName += ' < '
+    if ComparisonOperator == 'GreaterThanOrEqualToThreshold':
+        AlarmName += ' >= '
+    if ComparisonOperator == 'LessThanOrEqualToThreshold':
+        AlarmName += ' <= '
+    if ComparisonOperator == 'LessThanLowerOrGreaterThanUpperThreshold':
+        AlarmName += ' <> '
+    AlarmName += str(alarm_tag['Value'])
+    #AlarmName += alarm_separator.join(['', ComparisonOperator, str(alarm_tag['Value']), str(Period), "{}p".format(EvaluationPeriods), Statistic])
 
     # add the description to the alarm name. If none are specified, log a message
     try:
@@ -310,7 +321,7 @@ def determine_dimensions(AlarmName, alarm_separator, alarm_tag, instance_info, m
                         'Value': val
                     }
                 )
-                AlarmName += alarm_separator.join(['', dim, val])
+                #AlarmName += alarm_separator.join(['', dim, val])
                 properties_offset = properties_offset + 2
     except Exception as e:
         logger.error('Getting dimensions: {}'.format(e))
