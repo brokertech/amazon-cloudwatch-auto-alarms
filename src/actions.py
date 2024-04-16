@@ -230,7 +230,7 @@ def create_alarm_from_tag(id, name, alarm_tag, instance_info, metric_dimensions_
     namespace = alarm_properties[1]
     MetricName = alarm_properties[2]
 
-    AlarmName = f"{alarm_identifier} for {id}[{name}] - {namespace}/{MetricName}"
+    AlarmName = f"{alarm_identifier} for {id} [{name}] - {namespace}/{MetricName}"
     #AlarmName = alarm_separator.join([alarm_identifier, id, name, namespace, MetricName])
 
     dimensions, properties_offset, AlarmName = determine_dimensions(AlarmName, alarm_separator, alarm_tag,
@@ -252,16 +252,17 @@ def create_alarm_from_tag(id, name, alarm_tag, instance_info, metric_dimensions_
 
     Statistic = alarm_properties[(properties_offset + 5 + eval_period_offset)]
 
-    if ComparisonOperator in ['GreaterThanThreshold', 'GreaterThanUpperThreshold']:
-        AlarmName += ' > '
-    if ComparisonOperator in ['LessThanThreshold', 'LessThanLowerThreshold']:
-        AlarmName += ' < '
-    if ComparisonOperator == 'GreaterThanOrEqualToThreshold':
-        AlarmName += ' >= '
-    if ComparisonOperator == 'LessThanOrEqualToThreshold':
-        AlarmName += ' <= '
-    if ComparisonOperator == 'LessThanLowerOrGreaterThanUpperThreshold':
-        AlarmName += ' <> '
+    match ComparisonOperator:
+        case 'GreaterThanThreshold' | 'GreaterThanUpperThreshold':
+            AlarmName += ' > '
+        case 'LessThanThreshold' | 'LessThanLowerThreshold':
+            AlarmName += ' < '
+        case 'GreaterThanOrEqualToThreshold':
+            AlarmName += ' >= '
+        case 'LessThanOrEqualToThreshold':
+            AlarmName += ' <= '
+        case 'LessThanLowerOrGreaterThanUpperThreshold':
+            AlarmName += ' <> '
     AlarmName += str(alarm_tag['Value'])
     #AlarmName += alarm_separator.join(['', ComparisonOperator, str(alarm_tag['Value']), str(Period), "{}p".format(EvaluationPeriods), Statistic])
 
