@@ -149,10 +149,9 @@ def process_rds_alarms(db_arn, is_cluster, activation_tag, default_alarms, sns_t
     # capture optional alarm description
     try:
         AlarmDescription = alarm_properties[7]
-        AlarmName += alarm_separator + AlarmDescription
     except:
         logger.info('Description not supplied')
-        AlarmDescription = None
+        AlarmDescription = "Create by AutoAlarms"
 
     create_alarm(AlarmName, AlarmDescription, MetricName, ComparisonOperator, Period, tag['Value'], Statistic,
                  Namespace, dimensions, EvaluationPeriods, sns_topic_arn)
@@ -205,10 +204,9 @@ def process_lambda_alarms(function_name, tags, activation_tag, default_alarms, s
             # capture optional alarm description
             try:
                 AlarmDescription = alarm_properties[(6 + eval_period_offset)]
-                AlarmName += alarm_separator + AlarmDescription
             except:
                 logger.info('Description not supplied')
-                AlarmDescription = None
+                AlarmDescription = "Create by AutoAlarms"
 
             create_alarm(AlarmName, AlarmDescription, MetricName, ComparisonOperator, Period, tag['Value'], Statistic,
                          Namespace,
@@ -260,10 +258,9 @@ def create_alarm_from_tag(id, name, alarm_tag, instance_info, metric_dimensions_
     # add the description to the alarm name. If none are specified, log a message
     try:
         AlarmDescription = alarm_properties[(properties_offset + 6 + eval_period_offset)]
-        AlarmName += alarm_separator + AlarmDescription
     except:
         logger.info('Description not supplied')
-        AlarmDescription = None
+        AlarmDescription = "Create by AutoAlarms"
 
     create_alarm(AlarmName, AlarmDescription, MetricName, ComparisonOperator, Period, alarm_tag['Value'], Statistic,
                  namespace,
