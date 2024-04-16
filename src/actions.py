@@ -604,12 +604,11 @@ def create_alarm(AlarmName, AlarmDescription, MetricName, ComparisonOperator, Pe
             'Error creating alarm {}!: {}'.format(AlarmName, e))
 
 
-def delete_alarms(name, alarm_identifier, alarm_separator):
+def delete_alarms(name, alarm_identifier):
     try:
         AlarmNamePrefix = alarm_identifier
         if name:
-            AlarmNamePrefix += alarm_separator + name
-        AlarmNamePrefix += alarm_separator
+            AlarmNamePrefix += 'for {name}'
         cw_client = boto3_client('cloudwatch')
         logger.debug('calling describe alarms with prefix {}'.format(AlarmNamePrefix))
         response = cw_client.describe_alarms(

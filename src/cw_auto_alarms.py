@@ -186,7 +186,7 @@ def lambda_handler(event, context):
                                    cw_namespace, create_default_alarms_flag, alarm_separator, alarm_identifier)
         elif 'source' in event and event['source'] == 'aws.ec2' and event['detail']['state'] == 'terminated':
             instance_id = event['detail']['instance-id']
-            result = delete_alarms(instance_id, alarm_identifier, alarm_separator)
+            result = delete_alarms(instance_id, alarm_identifier)
         elif 'source' in event and event['source'] == 'aws.lambda' and event['detail'][
             'eventName'] == 'TagResource20170331v2':
             logger.debug(
@@ -206,7 +206,7 @@ def lambda_handler(event, context):
             'eventName'] == 'DeleteFunction20150331':
             function = event['detail']['requestParameters']['functionName']
             logger.debug('Delete Lambda Function event occurred for: {}'.format(function))
-            delete_alarms(function, alarm_identifier, alarm_separator)
+            delete_alarms(function, alarm_identifier)
         elif 'source' in event and event['source'] == 'aws.rds' and event['detail'].get('eventName',
                                                                                         None) == 'AddTagsToResource':
             logger.info(
@@ -236,7 +236,7 @@ def lambda_handler(event, context):
             db_arn = event['detail']['SourceArn']
             db_id = db_arn.split(':')[-1]
             logger.info('Delete DB Instance event occurred for RDS: {}'.format(db_id))
-            delete_alarms(db_id, alarm_identifier, alarm_separator)
+            delete_alarms(db_id, alarm_identifier)
         elif 'action' in event and event['action'] == 'scan':
             logger.info(
                 f'Scanning for EC2 instances with tag: {create_alarm_tag} to create alarm'
@@ -250,7 +250,7 @@ def lambda_handler(event, context):
             logger.info(
                 f'Deleting alarms beginning: {alarm_identifier}{alarm_separator}{name}'
             )
-            delete_alarms(name, alarm_identifier, alarm_separator)
+            delete_alarms(name, alarm_identifier)
 
     except Exception as e:
         # If any other exceptions which we didn't expect are raised
