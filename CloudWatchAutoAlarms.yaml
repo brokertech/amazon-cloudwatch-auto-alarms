@@ -162,7 +162,7 @@ Resources:
     Properties:
       Description: "Execute CloudWatchAutoAlarms on schedule"
       ScheduleExpression: "rate(1 day)"
-      State: "ENABLED"
+      State: "DISABLED"
       Targets:
         - Arn: !GetAtt LambdaFunction.Arn
           Id: LATEST
