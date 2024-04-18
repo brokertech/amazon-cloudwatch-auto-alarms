@@ -209,14 +209,21 @@ def process_lambda_alarms(function_name, tags, activation_tag, default_alarms, s
 #     dimensions, properties_offset, AlarmName = determine_dimensions(AlarmName, alarm_separator, alarm_tag, instance_info, metric_dimensions_map,
 #                                                                     namespace)
 
-def create_alarm_from_tag(id, name, alarm_tag, instance_info, metric_dimensions_map, sns_topic_arn, alarm_separator,
+def create_alarm_from_tag(id, alarm_tag, instance_info, metric_dimensions_map, sns_topic_arn, alarm_separator,
                           alarm_identifier):
     # split alarm tag to decipher alarm properties, first property is alarm_identifier and ignored...
     alarm_properties = alarm_tag['Key'].split(alarm_separator)
     namespace = alarm_properties[1]
     MetricName = alarm_properties[2]
 
-    AlarmName = f"{alarm_identifier} for {id} [{name}] - {namespace}/{MetricName}"
+    tags = instance_info['Tags']
+    instance_name = get_tag(tags, 'Name')
+    logger.debug('Name is: {}'.format(instance_name))
+
+    alarm_value = get_alarm_value(alarm_tag, tags)
+    logger.debug('Alarm value is: {}'.format(alarm_value))
+
+    AlarmName = f"{alarm_identifier} for {id} [{instance_name}] - {namespace}/{MetricName}"
     #AlarmName = alarm_separator.join([alarm_identifier, id, name, namespace, MetricName])
 
     dimensions, properties_offset, AlarmName = determine_dimensions(AlarmName, alarm_separator, alarm_tag,
@@ -238,10 +245,10 @@ def create_alarm_from_tag(id, name, alarm_tag, instance_info, metric_dimensions_
 
     Statistic = alarm_properties[(properties_offset + 5 + eval_period_offset)]
 
-    AlarmName += f" {get_comparison_for_name(ComparisonOperator)} {str(alarm_tag['Value'])}"
+    AlarmName += f" {get_comparison_for_name(ComparisonOperator)} {str(alarm_value)}"
     #AlarmName += alarm_separator.join(['', ComparisonOperator, str(alarm_tag['Value']), str(Period), "{}p".format(EvaluationPeriods), Statistic])
 
-    create_alarm(AlarmName, MetricName, ComparisonOperator, Period, alarm_tag['Value'], Statistic,
+    create_alarm(AlarmName, MetricName, ComparisonOperator, Period, alarm_value, Statistic,
                  namespace,
                  dimensions, EvaluationPeriods, sns_topic_arn, True)
 
@@ -354,27 +361,20 @@ def process_alarm_tags(instance_id, instance_info, default_alarms, wildcard_alar
 
     logger.debug('Platform is: {}'.format(platform))
 
-    instance_name = ''
-    for instance_tag in tags:
-        if instance_tag['Key'] == 'Name':
-            instance_name = instance_tag['Value']
-            break
-
-    logger.debug('Name is: {}'.format(instance_name))
-
     # scan instance tags and create alarms for any custom alarm tags
     for instance_tag in tags:
         if instance_tag['Key'].startswith(alarm_identifier):
-            create_alarm_from_tag(instance_id, instance_name, instance_tag, instance_info, metric_dimensions_map, sns_topic_arn,
+            create_alarm_from_tag(instance_id, instance_tag, instance_info, metric_dimensions_map, sns_topic_arn,
                                   alarm_separator, alarm_identifier)
+
 
     if create_default_alarms_flag == 'true':
         for alarm_tag in default_alarms['AWS/EC2']:
-            create_alarm_from_tag(instance_id, instance_name, alarm_tag, instance_info, metric_dimensions_map, sns_topic_arn,
+            create_alarm_from_tag(instance_id, alarm_tag, instance_info, metric_dimensions_map, sns_topic_arn,
                                   alarm_separator, alarm_identifier)
         if platform:
             for alarm_tag in default_alarms[cw_namespace][platform]:
-                create_alarm_from_tag(instance_id, instance_name, alarm_tag, instance_info, metric_dimensions_map, sns_topic_arn,
+                create_alarm_from_tag(instance_id, alarm_tag, instance_info, metric_dimensions_map, sns_topic_arn,
                                       alarm_separator, alarm_identifier)
             if wildcard_alarms and cw_namespace in wildcard_alarms and platform in wildcard_alarms[cw_namespace]:
                 for wildcard_alarm_tag in wildcard_alarms[cw_namespace][platform]:
@@ -383,7 +383,7 @@ def process_alarm_tags(instance_id, instance_info, default_alarms, wildcard_alar
                                                                     instance_info, metric_dimensions_map)
                     if resolved_alarm_tags:
                         for resolved_alarm_tag in resolved_alarm_tags:
-                            create_alarm_from_tag(instance_id, instance_name, resolved_alarm_tag, instance_info, metric_dimensions_map, sns_topic_arn,
+                            create_alarm_from_tag(instance_id, resolved_alarm_tag, instance_info, metric_dimensions_map, sns_topic_arn,
                                                   alarm_separator, alarm_identifier)
                     else:
                         logger.info("No wildcard alarms found for platform: {}".format(platform))
@@ -653,3 +653,19 @@ def process_wildcard_alarm(alarm_object):
     print("alarm object is {}".format(alarm_object))
     alarm_object['Key'] = "updated"
     return alarm_object
+
+
+def get_tag(tags, key):
+    for instance_tag in tags:
+        if instance_tag['Key'].startswith(key):
+            return instance_tag['Value']
+    return ''
+
+
+def get_alarm_value(alarm_tag, tags):
+    alarm_value = alarm_tag['Value']
+    if isinstance(alarm_tag['Value'], list):
+        for alarm_tag_value in alarm_tag['Value']:
+            if 'Key' not in alarm_tag_value or get_tag(tags, alarm_tag_value['Key']) == alarm_tag_value['Value']:
+                alarm_value = alarm_tag_value['Threshold']
+    return alarm_value

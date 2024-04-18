@@ -38,6 +38,7 @@ sns_topic_arn = getenv("DEFAULT_ALARM_SNS_TOPIC_ARN", None)
 
 alarm_separator = getenv("ALARM_SEPARATOR", '-')
 alarm_identifier = getenv("ALARM_IDENTIFIER_PREFIX", 'AutoAlarm')
+alarm_override_identifier = getenv("ALARM_OVERRIDE_PREFIX", 'AutoAlarmOverride')
 
 default_period = '5m'
 default_evaluation_periods = '1'
@@ -74,13 +75,31 @@ def lambda_handler(event, context):
                 'Key': alarm_separator.join(
                     [alarm_identifier, 'AWS/EC2', 'NetworkOut', 'GreaterThanOrEqualToThreshold', default_period,
                      default_evaluation_periods, default_statistic]),
-                'Value': alarm_network_out_high_default_threshold
+                'Value': [
+                    {
+                        'Threshold': alarm_network_out_high_default_threshold
+                    },
+                    {
+                        'Key': 'app',
+                        'Value': 'lighthouse',
+                        'Threshold': 200000000
+                    }
+                ]
             },
             {
                 'Key': alarm_separator.join(
                     [alarm_identifier, 'AWS/EC2', 'NetworkIn', 'GreaterThanOrEqualToThreshold', default_period,
                      default_evaluation_periods, default_statistic]),
-                'Value': alarm_network_in_high_default_threshold
+                'Value': [
+                    {
+                        'Threshold': alarm_network_in_high_default_threshold
+                    },
+                    {
+                        'Key': 'app',
+                        'Value': 'lighthouse',
+                        'Threshold': 200000000
+                    }
+                ]
             },
             {
                 'Key': alarm_separator.join(
@@ -166,7 +185,16 @@ def lambda_handler(event, context):
                     'Key': alarm_separator.join(
                         [alarm_identifier, cw_namespace, 'mem_used_percent', 'GreaterThanThreshold', default_period,
                          default_evaluation_periods, default_statistic]),
-                    'Value': alarm_memory_high_default_threshold
+                    'Value': [
+                        {
+                            'Threshold': alarm_memory_high_default_threshold
+                        },
+                        {
+                            'Key': 'app',
+                            'Value': 'lighthouse',
+                            'Threshold': 93
+                        }
+                    ]
                 }
             ],
             'SUSE': [
