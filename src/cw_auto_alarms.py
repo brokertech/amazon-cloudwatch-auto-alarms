@@ -23,8 +23,8 @@ alarm_cpu_high_anomaly_detection_default_threshold = getenv("ALARM_DEFAULT_ANOMA
 alarm_memory_high_default_threshold = getenv("ALARM_MEMORY_HIGH_THRESHOLD", "75")
 alarm_disk_space_percent_free_threshold = getenv("ALARM_DISK_PERCENT_LOW_THRESHOLD", "20")
 alarm_disk_used_percent_threshold = 100 - int(alarm_disk_space_percent_free_threshold)
-alarm_network_out_high_default_threshold = getenv("ALARM_NETWORK_OUT_HIGH_THRESHOLD", "20000000")
-alarm_network_in_high_default_threshold = getenv("ALARM_NETWORK_IN_HIGH_THRESHOLD", "20000000")
+alarm_network_out_high_default_threshold = getenv("ALARM_NETWORK_OUT_HIGH_THRESHOLD", "20971520")
+alarm_network_in_high_default_threshold = getenv("ALARM_NETWORK_IN_HIGH_THRESHOLD", "20971520")
 alarm_status_failed_threshold = getenv("ALARM_STATUS_FAILED_THRESHOLD", "1")
 
 alarm_rds_cpu_high_default_threshold = getenv("ALARM_RDS_CPU_HIGH_THRESHOLD", "75")
@@ -82,7 +82,7 @@ def lambda_handler(event, context):
                     {
                         'Key': 'app',
                         'Value': 'lighthouse',
-                        'Threshold': 200000000
+                        'Threshold': 209715200
                     }
                 ]
             },
@@ -97,7 +97,7 @@ def lambda_handler(event, context):
                     {
                         'Key': 'app',
                         'Value': 'lighthouse',
-                        'Threshold': 200000000
+                        'Threshold': 209715200
                     }
                 ]
             },
@@ -213,6 +213,7 @@ def lambda_handler(event, context):
             ]
         }
     }
+
     logger.info('event received: {}'.format(event))
     try:
         if 'source' in event and event['source'] == 'aws.ec2' and event['detail']['state'] == 'running':

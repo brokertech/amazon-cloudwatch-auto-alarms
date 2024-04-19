@@ -247,7 +247,8 @@ def create_alarm_from_tag(id, alarm_tag, instance_info, metric_dimensions_map, s
 
     Statistic = alarm_properties[(properties_offset + 5 + eval_period_offset)]
     
-    alarm_display_value = formatBytes(float(alarm_value)) if len(alarm_value) > 3 else str(alarm_value)
+    alarm_value = float(alarm_value)
+    alarm_display_value = formatBytes(alarm_value) if alarm_value > 999 else str(alarm_value)
 
     AlarmName += f" {get_comparison_for_name(ComparisonOperator)} {alarm_display_value}"
     #AlarmName += alarm_separator.join(['', ComparisonOperator, str(alarm_tag['Value']), str(Period), "{}p".format(EvaluationPeriods), Statistic])
