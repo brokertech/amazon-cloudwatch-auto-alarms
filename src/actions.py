@@ -4,6 +4,8 @@ from botocore.config import Config
 from os import getenv
 from datetime import datetime
 
+from utils import formatBytes
+
 logger = logging.getLogger()
 log_level = getenv("LOGLEVEL", "INFO")
 level = logging.getLevelName(log_level)
@@ -141,7 +143,7 @@ def process_rds_alarms(db_arn, is_cluster, activation_tag, default_alarms, sns_t
         EvaluationPeriods = alarm_properties[5]
         Statistic = alarm_properties[6]
 
-    AlarmName = f"{alarm_identifier} for {db_id} - {Namespace}/{MetricName} {get_comparison_for_name(ComparisonOperator)} {str(alarm_tag['Value'])}"
+    AlarmName = f"{alarm_identifier} for {db_id} - {Namespace}/{MetricName} {get_comparison_for_name(ComparisonOperator)} {str(tag['Value'])}"
     #AlarmName = alarm_separator.join(
     #    [alarm_identifier, db_id, Namespace, MetricName, ComparisonOperator, str(tag['Value']),
     #     Period, "{}p".format(EvaluationPeriods), Statistic])
@@ -189,7 +191,7 @@ def process_lambda_alarms(function_name, tags, activation_tag, default_alarms, s
 
             Statistic = alarm_properties[(5 + eval_period_offset)]
 
-            AlarmName = f"{alarm_identifier} for {function_name} - {Namespace}/{MetricName} {get_comparison_for_name(ComparisonOperator)} {str(alarm_tag['Value'])}"
+            AlarmName = f"{alarm_identifier} for {function_name} - {Namespace}/{MetricName} {get_comparison_for_name(ComparisonOperator)} {str(tag['Value'])}"
             #AlarmName = alarm_separator.join(
             #    [alarm_identifier, function_name, Namespace, MetricName, ComparisonOperator, str(tag['Value']),
             #     Period, "{}p".format(EvaluationPeriods), Statistic])
@@ -244,8 +246,10 @@ def create_alarm_from_tag(id, alarm_tag, instance_info, metric_dimensions_map, s
         eval_period_offset = 1
 
     Statistic = alarm_properties[(properties_offset + 5 + eval_period_offset)]
+    
+    alarm_display_value = formatBytes(float(alarm_value)) if len(alarm_value) > 3 else str(alarm_value)
 
-    AlarmName += f" {get_comparison_for_name(ComparisonOperator)} {str(alarm_value)}"
+    AlarmName += f" {get_comparison_for_name(ComparisonOperator)} {alarm_display_value}"
     #AlarmName += alarm_separator.join(['', ComparisonOperator, str(alarm_tag['Value']), str(Period), "{}p".format(EvaluationPeriods), Statistic])
 
     create_alarm(AlarmName, MetricName, ComparisonOperator, Period, alarm_value, Statistic,
