@@ -55,7 +55,7 @@ Resources:
           ALARM_NETWORK_IN_HIGH_THRESHOLD: 20000000
           ALARM_IDENTIFIER_PREFIX: !Ref AlarmIdentifierPrefix
           ALARM_SEPARATOR: "-"
-          CLOUDWATCH_APPEND_DIMENSIONS: 'InstanceId, ImageId, InstanceType'
+          CLOUDWATCH_APPEND_DIMENSIONS: 'InstanceId'
 
           ALARM_LAMBDA_ERROR_THRESHOLD: 0
           ALARM_LAMBDA_THROTTLE_THRESHOLD: 0
