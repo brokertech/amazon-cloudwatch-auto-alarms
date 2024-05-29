@@ -82,7 +82,7 @@ def lambda_handler(event, context):
                     {
                         'Key': 'app',
                         'Value': 'lighthouse',
-                        'Threshold': 200000000
+                        'Threshold': 250000000
                     }
                 ]
             },
@@ -97,7 +97,7 @@ def lambda_handler(event, context):
                     {
                         'Key': 'app',
                         'Value': 'lighthouse',
-                        'Threshold': 200000000
+                        'Threshold': 250000000
                     }
                 ]
             },
